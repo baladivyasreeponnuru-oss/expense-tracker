@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Expense Tracker</title>
+  <style>
+    :root {
+      --bg: #f3f5fb;
+      --surface: #ffffff;
+      --ink: #172036;
+      --muted: #6b7690;
+      --line: #e7ebf3;
+      --brand: #4f46e5;
+      --brand-dark: #4338ca;
+      --brand-soft: #eceafd;
+      --green: #0f9d63;
+      --green-soft: #e1f6ec;
+      --red: #e03e43;
+      --red-soft: #fdeaeb;
+      --shadow-sm: 0 1px 2px rgba(23,32,54,.06), 0 2px 6px rgba(23,32,54,.04);
+      --shadow-md: 0 2px 4px rgba(23,32,54,.05), 0 10px 28px rgba(23,32,54,.08);
+      --shadow-lg: 0 4px 8px rgba(23,32,54,.06), 0 18px 40px rgba(23,32,54,.14);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+      font-size: 15px; line-height: 1.5;
+    }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+
+    /* ---------- header ---------- */
+    .topbar {
+      background: radial-gradient(120% 140% at 0% 0%, #6366f1 0%, #4f46e5 40%, #3730a3 100%);
+      color: #fff; padding: 24px 0 100px; position: relative; overflow: hidden;
+    }
+    .topbar::after {
+      content: ""; position: absolute; right: -80px; top: -120px; width: 340px; height: 340px;
+      border-radius: 50%; background: rgba(255,255,255,.08);
+    }
+    .topbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; position: relative; z-index: 1; }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .logo {
+      width: 46px; height: 46px; border-radius: 14px; font-size: 22px; display: grid; place-items: center;
+      background: rgba(255,255,255,.2); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25), 0 6px 14px rgba(0,0,0,.18);
+    }
+    .brand h1 { margin: 0; font-size: 23px; font-weight: 700; letter-spacing: -.015em; line-height: 1.2; }
+    .brand small { display: block; opacity: .78; font-weight: 400; font-size: 13px; letter-spacing: 0; }
+    .filters { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .filters select {
+      appearance: none; border: 1px solid rgba(255,255,255,.35); background-color: rgba(255,255,255,.15);
+      color: #fff; padding: 10px 36px 10px 14px; border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='white' d='M2 4l4 4 4-4z'/></svg>");
+      background-repeat: no-repeat; background-position: right 13px center;
+      transition: background-color .15s;
+    }
+    .filters select:hover { background-color: rgba(255,255,255,.25); }
+    .filters select option { color: #172036; }
+    .btn-ghost {
+      color: #fff; text-decoration: none; font-size: 14px; font-weight: 500; padding: 10px 15px;
+      border: 1px solid rgba(255,255,255,.35); border-radius: 12px; background: rgba(255,255,255,.12);
+      transition: background-color .15s, transform .15s;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,.26); transform: translateY(-1px); }
+
+    main.wrap { margin-top: -72px; padding-bottom: 56px; position: relative; z-index: 2; }
+    .flash {
+      background: var(--red-soft); color: #a3262b; border: 1px solid #f5c2c4;
+      padding: 13px 16px; border-radius: 14px; margin-bottom: 16px; font-weight: 600; box-shadow: var(--shadow-sm);
+    }
+
+    /* ---------- KPI cards ---------- */
+    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .kpi {
+      background: var(--surface); border-radius: 18px; padding: 22px 24px; box-shadow: var(--shadow-md);
+      display: flex; align-items: center; gap: 18px; position: relative; overflow: hidden;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .kpi:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .kpi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
+    .kpi .icon {
+      width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; font-size: 24px; flex: none;
+    }
+    .kpi .label {
+      display: inline-block; font-size: 11.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 999px; margin-bottom: 4px;
+    }
+    .kpi .value { font-size: 29px; font-weight: 750; letter-spacing: -.025em; line-height: 1.15; }
+    .kpi .sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+    .kpi.inc::before { background: var(--green); }
+    .kpi.inc .icon { background: linear-gradient(135deg, #c9f1de, #e6f8ef); box-shadow: inset 0 0 0 1px #b6e8d0; }
+    .kpi.inc .label { background: var(--green-soft); color: var(--green); }
+    .kpi.inc .value { color: var(--green); }
+    .kpi.exp::before { background: var(--red); }
+    .kpi.exp .icon { background: linear-gradient(135deg, #fcd5d6, #feeeee); box-shadow: inset 0 0 0 1px #f7c0c2; }
+    .kpi.exp .label { background: var(--red-soft); color: var(--red); }
+    .kpi.exp .value { color: var(--red); }
+    .kpi.bal::before { background: var(--brand); }
+    .kpi.bal .icon { background: linear-gradient(135deg, #dcd9fb, #efeefe); box-shadow: inset 0 0 0 1px #cbc7f6; }
+    .kpi.bal .label { background: var(--brand-soft); color: var(--brand); }
+    .kpi.bal .value.neg { color: var(--red); }
+
+    /* ---------- cards ---------- */
+    .card {
+      background: var(--surface); border-radius: 18px; padding: 24px; box-shadow: var(--shadow-md); margin-top: 18px;
+      transition: box-shadow .18s ease;
+    }
+    .card:hover { box-shadow: var(--shadow-lg); }
+    .card h2 {
+      margin: 0 0 18px; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; letter-spacing: -.005em;
+    }
+    .card h2 .chip {
+      width: 30px; height: 30px; border-radius: 10px; background: var(--brand-soft); display: grid; place-items: center; font-size: 15px;
+    }
+    .card h2 .tag {
+      margin-left: auto; font-size: 12px; font-weight: 600; color: var(--brand); background: var(--brand-soft);
+      padding: 3px 11px; border-radius: 999px;
+    }
+
+    /* ---------- form ---------- */
+    form.add { display: grid; grid-template-columns: 1.1fr 1fr 1.2fr 1fr 1.5fr auto; gap: 14px; align-items: end; }
+    .field label {
+      display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: #4a5470;
+      margin-bottom: 7px; text-transform: uppercase; letter-spacing: .07em;
+    }
+    .field label .li {
+      width: 20px; height: 20px; border-radius: 7px; background: var(--brand-soft); display: grid; place-items: center; font-size: 11px;
+    }
+    .field input, .field select {
+      width: 100%; padding: 11px 13px; border: 1.5px solid var(--line); border-radius: 12px;
+      font-size: 14px; color: var(--ink); background: #fafbfe; font-family: inherit;
+      box-shadow: inset 0 1px 2px rgba(23,32,54,.04); transition: border-color .15s, box-shadow .15s, background .15s;
+    }
+    .field input:hover, .field select:hover { border-color: #d3d9e8; }
+    .field input:focus, .field select:focus {
+      outline: none; border-color: var(--brand); background: #fff; box-shadow: 0 0 0 4px rgba(79,70,229,.14);
+    }
+    .btn {
+      background: linear-gradient(135deg, #5b52f0, #4338ca); color: #fff; border: 0; padding: 12px 26px; border-radius: 12px;
+      font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; letter-spacing: .01em;
+      box-shadow: 0 6px 14px rgba(79,70,229,.35); transition: transform .15s, box-shadow .15s;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(79,70,229,.42); }
+    .btn:active { transform: translateY(0); }
+
+    /* ---------- charts ---------- */
+    .charts { display: grid; grid-template-columns: 1fr 1.25fr; gap: 18px; }
+    .charts .card { text-align: center; }
+    .charts img { max-width: 100%; height: auto; }
+
+    /* ---------- table ---------- */
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      text-align: left; font-size: 11.5px; color: #4a5470; text-transform: uppercase; letter-spacing: .08em;
+      font-weight: 700; padding: 13px 16px; background: #f6f8fc; border-bottom: 1px solid var(--line);
+    }
+    td { padding: 14px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr { transition: background .12s; }
+    tbody tr:hover { background: #f8f9fe; }
+    .date { font-weight: 600; white-space: nowrap; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+    thead th.num { text-align: right; }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px 4px 10px; border-radius: 999px;
+      font-size: 12px; font-weight: 700; letter-spacing: .02em;
+    }
+    .pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .pill.income  { background: var(--green-soft); color: var(--green); }
+    .pill.expense { background: var(--red-soft);   color: var(--red); }
+
+    .cat {
+      display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13.5px;
+      padding: 4px 12px 4px 5px; border-radius: 999px; border: 1px solid var(--line); background: #fff; box-shadow: var(--shadow-sm);
+    }
+    .cat .ic { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; }
+
+    .amt-income { color: var(--green); } .amt-expense { color: var(--red); }
+    .note { color: var(--muted); }
+    .del {
+      background: none; border: 0; color: #a0a8bb; cursor: pointer; font-size: 15px;
+      width: 32px; height: 32px; border-radius: 10px; transition: background .12s, color .12s;
+    }
+    .del:hover { background: var(--red-soft); color: var(--red); }
+    .empty { text-align: center; color: var(--muted); padding: 44px 0; }
+    .empty .big { font-size: 40px; margin-bottom: 6px; }
+
+    @media (max-width: 960px) {
+      .kpis { grid-template-columns: 1fr; }
+      form.add { grid-template-columns: 1fr 1fr; }
+      .charts { grid-template-columns: 1fr; }
+      .hide-sm { display: none; }
+    }
+  </style>
+</head>
+<body>
+  {# icon + colour for every category #}
+  {% set icons = {'Food':'🍽️','Rent':'🏠','Transport':'🚗','Bills':'💡','Shopping':'🛍️','Health':'💊','Entertainment':'🎬','Salary':'💼','Other':'📦'} %}
+  {% set tints = {'Food':'#fff1dc','Rent':'#e8e6fd','Transport':'#dff3fb','Bills':'#fff7cc','Shopping':'#fde3f0','Health':'#e1f6ec','Entertainment':'#f1e4fb','Salary':'#dcf5e8','Other':'#eceff5'} %}
+
+  <header class="topbar">
+    <div class="wrap">
+      <div class="brand">
+        <div class="logo">💰</div>
+        <h1>Expense Tracker<small>Know where your money goes</small></h1>
+      </div>
+      <form method="get" class="filters">
+        <select name="month" onchange="this.form.submit()" aria-label="Month">
+          <option value="">📅 All time</option>
+          {% for m in months %}<option value="{{ m }}" {{ 'selected' if m == selected }}>📅 {{ m }}</option>{% endfor %}
+        </select>
+        <a class="btn-ghost" href="{{ url_for('export_csv', month=selected) }}">⬇ CSV</a>
+        <a class="btn-ghost" href="{{ url_for('export_xlsx', month=selected) }}">⬇ Excel</a>
+      </form>
+    </div>
+  </header>
+
+  <main class="wrap">
+    {% for m in get_flashed_messages() %}<div class="flash">⚠ {{ m }}</div>{% endfor %}
+
+    <section class="kpis">
+      <div class="kpi inc">
+        <div class="icon">💵</div>
+        <div>
+          <span class="label">Income</span>
+          <div class="value">₹{{ "{:,.2f}".format(totals.income) }}</div>
+          <div class="sub">Money coming in</div>
+        </div>
+      </div>
+      <div class="kpi exp">
+        <div class="icon">🧾</div>
+        <div>
+          <span class="label">Expenses</span>
+          <div class="value">₹{{ "{:,.2f}".format(totals.expense) }}</div>
+          <div class="sub">Money going out</div>
+        </div>
+      </div>
+      <div class="kpi bal">
+        <div class="icon">🏦</div>
+        <div>
+          <span class="label">Balance</span>
+          <div class="value {{ 'neg' if totals.balance < 0 }}">₹{{ "{:,.2f}".format(totals.balance) }}</div>
+          <div class="sub">
+            {% if totals.income > 0 %}{{ ((totals.balance / totals.income) * 100)|round|int }}% of income saved{% else %}Income minus expenses{% endif %}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="chip">➕</span>Add a transaction</h2>
+      <form class="add" method="post" action="{{ url_for('add') }}">
+        <div class="field"><label><span class="li">📅</span>Date</label>
+          <input type="date" name="date" value="{{ today }}" required></div>
+        <div class="field"><label><span class="li">🔁</span>Type</label>
+          <select name="type"><option value="expense">🔴 Expense</option><option value="income">🟢 Income</option></select></div>
+        <div class="field"><label><span class="li">🏷️</span>Category</label>
+          <select name="category">{% for c in categories %}<option value="{{ c }}">{{ icons[c] }} {{ c }}</option>{% endfor %}</select></div>
+        <div class="field"><label><span class="li">₹</span>Amount</label>
+          <input type="number" name="amount" step="0.01" min="0.01" placeholder="0.00" required></div>
+        <div class="field"><label><span class="li">📝</span>Note</label>
+          <input type="text" name="note" placeholder="Optional, e.g. groceries"></div>
+        <button class="btn">+ Add</button>
+      </form>
+    </section>
+
+    <section class="charts">
+      <div class="card">
+        <h2><span class="chip">🍩</span>Spending by category{% if selected %}<span class="tag">{{ selected }}</span>{% endif %}</h2>
+        <img src="{{ url_for('pie', month=selected) }}" alt="Spending by category">
+      </div>
+      <div class="card">
+        <h2><span class="chip">📊</span>Income vs expenses by month</h2>
+        <img src="{{ url_for('bar') }}" alt="Income vs expenses by month">
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="chip">📋</span>Transactions<span class="tag">{{ rows|length }} {{ 'entry' if rows|length == 1 else 'entries' }}</span></h2>
+      {% if rows %}
+      <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Type</th><th>Category</th><th class="hide-sm">Note</th><th class="num">Amount</th><th></th></tr>
+        </thead>
+        <tbody>
+        {% for r in rows %}
+          <tr>
+            <td class="date">{{ r.date.strftime('%d %b %Y') }}</td>
+            <td><span class="pill {{ r.type }}">{{ r.type|capitalize }}</span></td>
+            <td><span class="cat"><span class="ic" style="background:{{ tints.get(r.category, '#eceff5') }}">{{ icons.get(r.category, '📦') }}</span>{{ r.category }}</span></td>
+            <td class="note hide-sm">{{ r.note or '—' }}</td>
+            <td class="num amt-{{ r.type }}">{{ '+' if r.type == 'income' else '−' }}₹{{ "{:,.2f}".format(r.amount) }}</td>
+            <td style="text-align:right">
+              <form method="post" action="{{ url_for('delete', tx_id=r.id) }}" onsubmit="return confirm('Delete this transaction?')">
+                <button class="del" title="Delete">✕</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% else %}
+      <div class="empty"><div class="big">🧾</div>No transactions yet. Add your first one above.</div>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>
